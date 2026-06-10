@@ -1,0 +1,1162 @@
+* {
+  box-sizing: border-box;
+}
+
+/* GUIA CSS: base visual global, fondo y dimensiones de pantalla completa. */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #121826;
+  color: #f8fafc;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 14px;
+  padding: 11px 16px;
+  background: #f59e0b;
+  color: #111827;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.08);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+input,
+select {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  color: white;
+  outline: none;
+}
+
+.secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+}
+
+.success {
+  background: #22c55e;
+  color: #052e16;
+}
+
+.danger {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* GUIA CSS: utilidades compartidas y canvas Three.js. */
+.hidden {
+  display: none !important;
+}
+
+#world {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* GUIA CSS: login/registro oculta el mundo 3D para evitar que se vea atras. */
+body.auth-mode #world {
+  display: none;
+}
+
+/* GUIA CSS: panel base de modales, minijuego, tienda, progreso y dashboard. */
+.panel {
+  position: fixed;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(18px);
+}
+
+/* GUIA CSS: pantallas de autenticacion. */
+.auth-panel {
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  transform: none;
+  padding: 28px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(56, 189, 248, 0.24), transparent 34%),
+    radial-gradient(circle at 78% 72%, rgba(245, 158, 11, 0.22), transparent 30%),
+    linear-gradient(135deg, #0f172a, #111827 48%, #172554);
+}
+
+.auth-panel > * {
+  width: min(430px, calc(100vw - 40px));
+}
+
+.auth-panel h1 {
+  margin: 0 0 8px;
+  font-size: 42px;
+}
+
+.auth-panel p {
+  color: #cbd5e1;
+}
+
+.auth-panel input,
+.auth-panel select {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.auth-panel .row {
+  justify-content: center;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.msg {
+  min-height: 22px;
+  color: #fca5a5;
+}
+
+/* GUIA CSS: HUD superior del alumno y menu lateral. */
+.hud {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  top: 16px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.menu-btn,
+.hud-status {
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  backdrop-filter: blur(14px);
+}
+
+.menu-btn {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.menu-btn span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 999px;
+  background: #f8fafc;
+}
+
+.hud-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+#hudStats {
+  color: #fde68a;
+}
+
+#hudMap {
+  color: #bae6fd;
+}
+
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  background: rgba(2, 6, 23, 0.42);
+}
+
+.side-menu {
+  position: fixed;
+  left: 16px;
+  top: 76px;
+  z-index: 16;
+  width: min(320px, calc(100vw - 32px));
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(16px);
+}
+
+.side-menu-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.side-menu-head span {
+  display: block;
+  margin-bottom: 4px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.side-menu-head strong {
+  font-size: 20px;
+}
+
+.side-menu-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.side-menu-actions button {
+  width: 100%;
+  text-align: left;
+}
+
+.confirm-panel {
+  left: 50%;
+  top: 50%;
+  z-index: 22;
+  width: min(420px, calc(100vw - 32px));
+  transform: translate(-50%, -50%);
+  padding: 22px;
+}
+
+.confirm-panel h2 {
+  margin: 0 0 8px;
+}
+
+.confirm-panel p {
+  margin: 0 0 18px;
+  color: #cbd5e1;
+}
+
+.tutorial-panel {
+  left: 50%;
+  top: 50%;
+  z-index: 21;
+  width: min(640px, calc(100vw - 32px));
+  min-height: 420px;
+  transform: translate(-50%, -50%);
+  padding: 22px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.tutorial-body {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 20px;
+  min-height: 260px;
+  padding: 24px;
+  border-radius: 18px;
+  background: rgba(2, 6, 23, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  text-align: center;
+}
+
+.tutorial-icon {
+  width: 104px;
+  height: 104px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #f59e0b, #38bdf8);
+  color: #06111f;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.tutorial-body p {
+  max-width: 500px;
+  margin: 0;
+  color: #e5e7eb;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.tutorial-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.portal-info {
+  position: fixed;
+  z-index: 9;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 32px));
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(17, 24, 39, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  text-align: center;
+}
+
+/* GUIA CSS: panel del minijuego y controles de preguntas. */
+.game-panel {
+  left: 50%;
+  top: 50%;
+  width: min(900px, calc(100vw - 28px));
+  max-height: calc(100vh - 40px);
+  transform: translate(-50%, -50%);
+  padding: 22px;
+  overflow: auto;
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+
+.panel-head h2 {
+  margin: 0;
+}
+
+.panel-head p {
+  margin: 4px 0 0;
+  color: #cbd5e1;
+}
+
+.level-navigator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 12px;
+}
+
+.level-navigator label {
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+.question-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 16px;
+}
+
+.question-dot {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  padding: 0;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.10);
+  color: #f8fafc;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  font-weight: 800;
+}
+
+.question-dot.correct {
+  background: rgba(34, 197, 94, 0.24);
+  border-color: rgba(34, 197, 94, 0.9);
+  color: #dcfce7;
+}
+
+.question-dot.incorrect {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.88);
+  color: #fee2e2;
+}
+
+.question-dot.active {
+  outline: 3px solid rgba(56, 189, 248, 0.72);
+  outline-offset: 2px;
+}
+
+.question-prompt {
+  font-size: 20px;
+  line-height: 1.4;
+  margin: 14px 0;
+}
+
+.code {
+  margin: 12px 0;
+  padding: 14px;
+  background: #020617;
+  border-radius: 14px;
+  color: #bfdbfe;
+  white-space: pre-wrap;
+  font-family: Consolas, monospace;
+  overflow: auto;
+}
+
+.options,
+.lines,
+.bank {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.option,
+.line-card,
+.word {
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.option.selected,
+.line-card.selected {
+  background: #38bdf8;
+  color: #082f49;
+}
+
+.order-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.order-list li {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: grab;
+  font-family: Consolas, monospace;
+}
+
+.template {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.template-line {
+  padding: 10px 12px;
+  background: #020617;
+  border-radius: 12px;
+  font-family: Consolas, monospace;
+  color: #e0f2fe;
+  white-space: pre-wrap;
+}
+
+.numeric {
+  width: min(280px, 100%);
+  margin-top: 14px;
+}
+
+.result-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.result-good {
+  color: #86efac;
+}
+
+.result-bad {
+  color: #fca5a5;
+}
+
+/* GUIA CSS: tienda de skins. */
+.skins-panel {
+  right: 18px;
+  top: 82px;
+  width: min(540px, calc(100vw - 36px));
+  max-height: calc(100vh - 110px);
+  padding: 20px;
+  overflow: auto;
+}
+
+.skins-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+  gap: 12px;
+}
+
+.skin-card {
+  min-height: 142px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 8px;
+}
+
+.skin-preview {
+  height: 86px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: rgba(2, 6, 23, 0.35);
+}
+
+.skin-card strong {
+  display: block;
+}
+
+.skin-card span {
+  color: #cbd5e1;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  top: 82px;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(2, 6, 23, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: white;
+}
+
+@media (max-width: 720px) {
+  .hud {
+    left: 10px;
+    right: 10px;
+  }
+
+  .row {
+    flex-wrap: wrap;
+  }
+
+  button {
+    flex: 1;
+  }
+
+  .menu-btn {
+    flex: 0 0 48px;
+  }
+
+  .hud-status {
+    max-width: calc(100vw - 78px);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .question-dot {
+    flex: 0 0 42px;
+  }
+}
+
+#mapBtn:disabled {
+  display: none;
+}
+
+/* Feedback por pregunta (validacion al pulsar Continuar) */
+.question-feedback {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.question-feedback.feedback-good {
+  background: rgba(34, 197, 94, 0.16);
+  border: 1px solid rgba(34, 197, 94, 0.55);
+  color: #bbf7d0;
+}
+
+.question-feedback.feedback-bad {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  color: #fecaca;
+}
+
+.feedback-reward {
+  display: inline-block;
+  margin-top: 6px;
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.back-btn {
+  margin-bottom: 14px;
+}
+
+.help-btn {
+  width: 46px;
+  min-width: 46px;
+  padding-inline: 0;
+  border-radius: 999px;
+  font-size: 18px;
+}
+
+/* GUIA CSS: dashboard profesor: grupos, inscripcion, estadisticas y perfiles. */
+.teacher-panel {
+  left: 50%;
+  top: 50%;
+  width: calc(100vw - 24px);
+  height: calc(100vh - 24px);
+  transform: translate(-50%, -50%);
+  padding: 22px;
+  overflow: hidden;
+}
+
+.teacher-layout {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 16px;
+  height: calc(100% - 72px);
+  min-height: 0;
+}
+
+.teacher-sidebar,
+.teacher-main {
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.teacher-sidebar h3,
+.teacher-main h3 {
+  margin-top: 0;
+}
+
+.group-form,
+.student-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.student-form {
+  grid-template-columns: minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr) auto;
+  align-items: center;
+}
+
+.groups-list,
+.students-list,
+.student-progress,
+.all-students-list {
+  display: grid;
+  gap: 10px;
+}
+
+.students-list {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  margin-bottom: 14px;
+}
+
+.group-card {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.group-card.selected {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: rgba(56, 189, 248, 0.7);
+}
+
+.group-card span,
+.empty-state {
+  color: #cbd5e1;
+}
+
+.student-card {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  text-align: left;
+}
+
+.student-card h4 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.student-card span,
+.student-card small {
+  color: #cbd5e1;
+}
+
+.student-card.selected {
+  border-color: rgba(56, 189, 248, 0.7);
+  background: rgba(56, 189, 248, 0.16);
+}
+
+.group-stats,
+.student-create-panel,
+.enroll-panel {
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.group-stats h3,
+.student-create-panel h3,
+.enroll-panel h3 {
+  margin: 0 0 10px;
+}
+
+.group-stats h4 {
+  margin: 14px 0 10px;
+  color: #e5e7eb;
+}
+
+.group-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.group-stat-card,
+.student-check {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.group-stat-card {
+  display: grid;
+  gap: 6px;
+}
+
+.group-stat-card span {
+  color: #cbd5e1;
+}
+
+.student-check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.enroll-panel input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.student-detail-head,
+.student-detail-theme-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.student-detail-head {
+  margin-bottom: 14px;
+}
+
+.student-detail-head p,
+.student-detail-theme-head span {
+  color: #cbd5e1;
+}
+
+.student-detail-theme {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.progress-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) repeat(3, minmax(120px, auto));
+  gap: 8px;
+  align-items: center;
+}
+
+.progress-pill {
+  display: inline-block;
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  color: #e5e7eb;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.progress-pill.done {
+  background: rgba(34, 197, 94, 0.22);
+  color: #bbf7d0;
+}
+
+/* GUIA CSS: panel de progreso del alumno. */
+.progress-panel {
+  left: 50%;
+  top: 50%;
+  width: min(1180px, calc(100vw - 32px));
+  height: min(760px, calc(100vh - 32px));
+  transform: translate(-50%, -50%);
+  padding: 22px;
+  overflow: hidden;
+}
+
+.progress-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+  height: calc(100% - 74px);
+  min-height: 0;
+}
+
+.progress-sidebar,
+.progress-main {
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.progress-sidebar h3,
+.progress-main h3 {
+  margin-top: 0;
+}
+
+.progress-themes,
+.progress-questions {
+  display: grid;
+  gap: 10px;
+}
+
+.progress-theme-card,
+.difficulty-summary {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.progress-theme-card.selected,
+.difficulty-summary.selected {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.7);
+}
+
+.progress-theme-card span,
+.difficulty-summary span,
+#progressTopicMeta {
+  color: #cbd5e1;
+}
+
+.mini-bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.mini-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22c55e, #38bdf8);
+}
+
+.progress-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.progress-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.progress-controls select {
+  min-width: 150px;
+}
+
+.progress-difficulty-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.progress-levels {
+  margin-bottom: 14px;
+}
+
+.progress-levels h4 {
+  margin: 0 0 10px;
+}
+
+.level-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 10px;
+}
+
+.level-card {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.level-card span,
+.level-card small {
+  color: #cbd5e1;
+}
+
+.level-card.completed {
+  border-color: rgba(34, 197, 94, 0.65);
+  background: rgba(34, 197, 94, 0.14);
+}
+
+.level-card.current {
+  border-color: rgba(56, 189, 248, 0.72);
+  background: rgba(56, 189, 248, 0.13);
+}
+
+.level-card.locked {
+  opacity: 0.62;
+}
+
+.progress-question {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.progress-question.current {
+  border-color: rgba(56, 189, 248, 0.75);
+  background: rgba(56, 189, 248, 0.13);
+}
+
+.question-status-dot {
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: #94a3b8;
+}
+
+.progress-question.correct .question-status-dot {
+  background: #22c55e;
+}
+
+.progress-question.incorrect .question-status-dot {
+  background: #f97316;
+}
+
+.progress-question.pending .question-status-dot {
+  background: #64748b;
+}
+
+.progress-question-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.progress-question-head span,
+.current-badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  color: #e5e7eb;
+  font-size: 12px;
+}
+
+.current-badge {
+  background: rgba(56, 189, 248, 0.22);
+  color: #bae6fd;
+}
+
+.progress-question p {
+  margin: 7px 0 6px;
+  line-height: 1.42;
+}
+
+.progress-question small {
+  color: #cbd5e1;
+}
+
+.compact-head {
+  margin-bottom: 10px;
+}
+
+/* GUIA CSS: ayuda Python por chat. */
+.chat-panel {
+  right: 18px;
+  top: 82px;
+  width: min(430px, calc(100vw - 36px));
+  max-height: calc(100vh - 110px);
+  padding: 18px;
+  display: grid;
+  grid-template-rows: auto minmax(220px, 1fr) auto;
+  gap: 12px;
+}
+
+.chat-messages {
+  overflow: auto;
+  padding: 10px;
+  border-radius: 16px;
+  background: rgba(2, 6, 23, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: grid;
+  gap: 10px;
+}
+
+.chat-bubble {
+  padding: 10px 12px;
+  border-radius: 14px;
+  line-height: 1.42;
+  white-space: pre-wrap;
+}
+
+.chat-bubble.from-user {
+  justify-self: end;
+  max-width: 86%;
+  background: #38bdf8;
+  color: #082f49;
+}
+
+.chat-bubble.from-assistant {
+  justify-self: start;
+  max-width: 92%;
+  background: rgba(255, 255, 255, 0.10);
+  color: #f8fafc;
+}
+
+.chat-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+
+#chatInput {
+  width: 100%;
+  resize: vertical;
+  min-height: 74px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  color: white;
+  outline: none;
+  font: inherit;
+}
+
+/* GUIA CSS: responsive para dashboard/progreso en pantallas chicas. */
+@media (max-width: 900px) {
+  .teacher-layout,
+  .progress-layout,
+  .student-form,
+  .progress-row,
+  .progress-difficulty-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-panel,
+  .progress-panel {
+    overflow: auto;
+  }
+
+  .teacher-layout,
+  .progress-layout {
+    height: auto;
+  }
+
+  .progress-toolbar,
+  .progress-controls {
+    display: grid;
+    width: 100%;
+  }
+}

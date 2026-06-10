@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CapyCode</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "/vendor/three/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body class="auth-mode">
+  <!-- GUIA HTML: canvas Three.js donde se dibuja el mundo 3D. -->
+  <canvas id="world"></canvas>
+
+  <!-- GUIA HTML: pantalla inicial para escoger alumno/profesor/registro. -->
+  <section id="roleChoice" class="panel auth-panel">
+    <h1>CapyCode</h1>
+    <p>Elige cómo quieres entrar.</p>
+    <div class="role-grid">
+      <button id="studentModeBtn">Soy alumno</button>
+      <button id="teacherModeBtn" class="secondary">Soy profesor</button>
+      <button id="teacherRegisterModeBtn" class="secondary">Registrar profesor</button>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: registro publico de profesor. -->
+  <section id="teacherRegister" class="panel auth-panel hidden">
+    <button id="backTeacherRegisterBtn" class="secondary back-btn">← Volver</button>
+    <h1>Registrar profesor</h1>
+    <p>Crea una cuenta de profesor para poder entrar al dashboard.</p>
+    <input id="teacherRegisterUsername" autocomplete="username" placeholder="Usuario del profesor">
+    <input id="teacherRegisterPassword" autocomplete="new-password" type="password" placeholder="Contraseña">
+    <div class="row">
+      <button id="createTeacherAccountBtn">Crear profesor</button>
+    </div>
+    <p id="teacherRegisterMsg" class="msg"></p>
+  </section>
+
+  <!-- GUIA HTML: login general; app.js decide si abre alumno o profesor. -->
+  <section id="auth" class="panel auth-panel hidden">
+    <button id="backRoleBtn" class="secondary back-btn">← Volver</button>
+    <h1 id="authTitle">CapyCode</h1>
+    <p id="authSubtitle">Inicia sesión para continuar.</p>
+    <input id="username" autocomplete="username" placeholder="Usuario">
+    <input id="password" autocomplete="current-password" type="password" placeholder="Contraseña">
+    <div class="row">
+      <button id="loginBtn">Entrar</button>
+    </div>
+    <p id="authMsg" class="msg"></p>
+  </section>
+
+  <!-- GUIA HTML: barra superior limpia del alumno: menu, mapa, monedas y XP. -->
+  <section id="hud" class="hud hidden">
+    <button id="menuBtn" class="menu-btn" aria-label="Abrir menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="hud-status">
+      <span id="hudMap"></span>
+      <span id="hudStats"></span>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: menu lateral del alumno con progreso, skins, tutorial, grupo y sesion. -->
+  <div id="sideMenuBackdrop" class="side-menu-backdrop hidden"></div>
+  <aside id="sideMenu" class="side-menu hidden">
+    <div class="side-menu-head">
+      <div>
+        <span>Usuario</span>
+        <strong id="hudUser"></strong>
+      </div>
+      <button id="closeSideMenu" class="secondary">Cerrar</button>
+    </div>
+    <div class="side-menu-actions">
+      <button id="tutorialBtn" class="secondary">Tutorial</button>
+      <button id="joinGroupBtn" class="secondary">Grupo</button>
+      <button id="progressBtn" class="secondary">Progreso</button>
+      <button id="skinsBtn">Skins</button>
+      <button id="chatBtn" class="secondary">Python AI Help</button>
+      <button id="mapBtn" class="secondary">Mapa principal</button>
+      <button id="logoutBtn" class="danger">Cerrar sesion</button>
+    </div>
+  </aside>
+
+  <!-- GUIA HTML: confirmacion antes de cerrar sesion. -->
+  <section id="logoutConfirm" class="panel confirm-panel hidden">
+    <h2>Cerrar sesion</h2>
+    <p>Tu progreso guardado se conserva. Tendras que iniciar sesion para volver a jugar.</p>
+    <div class="row right">
+      <button id="cancelLogoutBtn" class="secondary">Cancelar</button>
+      <button id="confirmLogoutBtn" class="danger">Cerrar sesion</button>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: alumno se une a grupo con codigo generado por el profesor. -->
+  <section id="joinGroupPanel" class="panel confirm-panel hidden">
+    <h2>Unirme a grupo</h2>
+    <p>Escribe el codigo que te dio tu profesor.</p>
+    <input id="joinGroupCode" placeholder="Codigo de grupo">
+    <p id="joinGroupMsg" class="msg"></p>
+    <div class="row right">
+      <button id="cancelJoinGroupBtn" class="secondary">Cancelar</button>
+      <button id="confirmJoinGroupBtn">Unirme</button>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: popup tutorial tipo presentacion. -->
+  <section id="tutorialPanel" class="panel tutorial-panel hidden">
+    <div class="panel-head">
+      <div>
+        <h2 id="tutorialTitle">Tutorial</h2>
+        <p id="tutorialCounter"></p>
+      </div>
+      <button id="closeTutorial" class="secondary">Cerrar</button>
+    </div>
+    <div id="tutorialBody" class="tutorial-body"></div>
+    <div class="tutorial-footer">
+      <button id="tutorialPrev" class="secondary">Anterior</button>
+      <button id="tutorialNext">Siguiente</button>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: dashboard profesor; grupos, inscripciones, estadisticas y perfiles. -->
+  <section id="teacherDashboard" class="panel teacher-panel hidden">
+    <div class="panel-head">
+      <div>
+        <h2>Dashboard profesor</h2>
+        <p id="teacherName"></p>
+      </div>
+      <button id="teacherLogoutBtn" class="secondary">Cerrar sesion</button>
+    </div>
+
+    <div class="teacher-layout">
+      <aside class="teacher-sidebar">
+        <h3>Grupos</h3>
+        <div class="group-form">
+          <input id="groupNumber" type="number" min="1" placeholder="Número">
+          <input id="groupName" placeholder="Nombre del grupo">
+          <input id="groupMaxStudents" type="number" min="1" placeholder="Cupo maximo">
+          <input id="groupDescription" placeholder="Descripción breve">
+          <button id="addGroupBtn">Guardar grupo</button>
+        </div>
+        <div id="groupsList" class="groups-list"></div>
+      </aside>
+
+      <main class="teacher-main">
+        <div class="panel-head compact-head">
+          <div>
+            <h3 id="selectedGroupTitle">Selecciona un grupo</h3>
+            <p id="selectedGroupMeta"></p>
+          </div>
+        </div>
+
+        <div class="student-create-panel">
+          <h3>Inscribir alumno nuevo</h3>
+          <div class="student-form">
+          <input id="studentUsername" placeholder="Usuario del alumno">
+          <input id="studentPassword" type="password" placeholder="Contraseña">
+          <select id="studentGroupSelect"></select>
+            <button id="addStudentBtn">Crear e inscribir</button>
+          </div>
+        </div>
+
+        <div class="enroll-panel">
+          <h3>Inscribir alumno existente</h3>
+          <input id="studentSearch" placeholder="Buscar alumno">
+          <div id="allStudentsList" class="all-students-list"></div>
+          <button id="enrollSelectedBtn" class="secondary">Agregar seleccionados al grupo</button>
+        </div>
+
+        <div id="groupStats" class="group-stats"></div>
+        <div id="studentsList" class="students-list"></div>
+        <div id="studentDetail" class="group-stats hidden"></div>
+      </main>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: aviso contextual cuando el jugador esta cerca de un portal. -->
+  <section id="portalInfo" class="portal-info hidden"></section>
+
+  <!-- GUIA HTML: panel del minijuego con preguntas, niveles y boton Revisar. -->
+  <section id="minigame" class="panel game-panel hidden">
+    <div class="panel-head">
+      <div>
+        <h2 id="gameTitle"></h2>
+        <p id="gameProgress"></p>
+      </div>
+      <button id="closeGame" class="secondary">Cerrar</button>
+    </div>
+    <div id="questionBox"></div>
+    <div class="row right">
+      <button id="prevQuestion" class="secondary">Anterior</button>
+      <button id="checkQuestion" class="success">Revisar</button>
+      <button id="nextQuestion">Siguiente</button>
+      <button id="submitGame" class="success hidden">Enviar</button>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: tienda de skins. -->
+  <section id="skinsPanel" class="panel skins-panel hidden">
+    <div class="panel-head">
+      <div>
+        <h2>Skins</h2>
+        <p id="skinsCoins"></p>
+      </div>
+      <button id="closeSkins" class="secondary">Cerrar</button>
+    </div>
+    <div id="skinsGrid" class="skins-grid"></div>
+  </section>
+
+  <!-- GUIA HTML: progreso visible del alumno por tema, dificultad, nivel y pregunta. -->
+  <section id="progressPanel" class="panel progress-panel hidden">
+    <div class="panel-head">
+      <div>
+        <h2>Progreso</h2>
+        <p id="progressSummary">Cargando progreso...</p>
+      </div>
+      <button id="closeProgress" class="secondary">Cerrar</button>
+    </div>
+
+    <div class="progress-layout">
+      <aside class="progress-sidebar">
+        <h3>Temas</h3>
+        <div id="progressThemes" class="progress-themes"></div>
+      </aside>
+
+      <main class="progress-main">
+        <div class="progress-toolbar">
+          <div>
+            <h3 id="progressTopicTitle">Selecciona un tema</h3>
+            <p id="progressTopicMeta"></p>
+          </div>
+          <div class="progress-controls">
+            <select id="progressDifficulty"></select>
+            <select id="progressFilter">
+              <option value="all">Todas</option>
+              <option value="correct">Correctas</option>
+              <option value="incorrect">Por corregir</option>
+              <option value="pending">Pendientes</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="progressDifficultyCards" class="progress-difficulty-cards"></div>
+        <div id="progressLevels" class="progress-levels"></div>
+        <div id="progressQuestions" class="progress-questions"></div>
+      </main>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: ayuda Python con chat. -->
+  <section id="chatPanel" class="panel chat-panel hidden">
+    <div class="panel-head">
+      <div>
+        <h2>Python AI Help</h2>
+        <p>Pregunta dudas rápidas de código.</p>
+      </div>
+      <button id="closeChat" class="secondary">Cerrar</button>
+    </div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <div class="chat-input-row">
+      <textarea id="chatInput" rows="3" placeholder="Escribe tu duda de Python..."></textarea>
+      <button id="sendChatBtn">Enviar</button>
+    </div>
+  </section>
+
+  <!-- GUIA HTML: mensajes temporales tipo toast. -->
+  <section id="toast" class="toast hidden"></section>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
