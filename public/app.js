@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { MTLLoader } from '/vendor/three/examples/loaders/MTLLoader.js';
-import { OBJLoader } from '/vendor/three/examples/loaders/OBJLoader.js';
+import { GLTFLoader } from '/vendor/three/examples/loaders/GLTFLoader.js';
+import { DRACOLoader } from '/vendor/three/examples/loaders/DRACOLoader.js';
 
 const $ = id => document.getElementById(id);
 
@@ -47,6 +47,10 @@ let chatHistory = [];
 const keys = {};
 const assetCache = new Map();
 const ASSET_BASE = '/assets/objects';
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('/vendor/three/examples/libs/draco/gltf/');
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
 
 // GUIA FRONTEND: imagenes PNG de skins en la tienda.
 // Si agregas una skin nueva, registra aqui su archivo de public/assets/skins.
@@ -201,7 +205,7 @@ const MAP_MODEL_TRANSFORMS = {
   scene1: {},
   scene2: {},
   scene3: { x: 1.8, z: -4},
-  scene5: {rotX: Math.PI / 2},
+  scene5: {},
   scene6: {},
   scene7: {},
   scene8: {},
@@ -1590,28 +1594,9 @@ function loadObj(category, name) {
   if (assetCache.has(key)) return assetCache.get(key);
 
   const promise = new Promise((resolve, reject) => {
-    const mtlLoader = new MTLLoader();
-    mtlLoader.setPath(`${ASSET_BASE}/${category}/`);
-    mtlLoader.setResourcePath(`${ASSET_BASE}/textures/`);
-    mtlLoader.load(`${name}.mtl`, materials => {
-      materials.preload();
-      const objLoader = new OBJLoader();
-      objLoader.setMaterials(materials);
-      objLoader.setPath(`${ASSET_BASE}/${category}/`);
-      objLoader.load(`${name}.obj`, object => {
-        object.traverse(child => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            if (Array.isArray(child.material)) {
-              child.material.forEach(material => material.side = THREE.DoubleSide);
-            } else if (child.material) {
-              child.material.side = THREE.DoubleSide;
-            }
-          }
-        });
-        resolve(object);
-      }, undefined, reject);
+    gltfLoader.load(`${ASSET_BASE}/${category}/${name}.glb`, gltf => {
+      prepareLoadedModel(gltf.scene);
+      resolve(gltf.scene);
     }, undefined, reject);
   });
 
@@ -1621,7 +1606,51 @@ function loadObj(category, name) {
 
 async function cloneObj(category, name) {
   const source = await loadObj(category, name);
-  return source.clone(true);
+  return cloneLoadedModel(source);
+}
+
+function prepareLoadedModel(object) {
+  object.traverse(child => {
+    if (!child.isMesh) return;
+
+    child.castShadow = true;
+    child.receiveShadow = true;
+
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    materials.filter(Boolean).forEach(material => {
+      material.side = THREE.DoubleSide;
+    });
+  });
+}
+
+function cloneLoadedModel(source) {
+  const clone = source.clone(true);
+
+  clone.traverse(child => {
+    if (!child.isMesh) return;
+
+    if (child.geometry) child.geometry = child.geometry.clone();
+
+    if (Array.isArray(child.material)) {
+      child.material = child.material.map(material => cloneMaterial(material));
+    } else if (child.material) {
+      child.material = cloneMaterial(child.material);
+    }
+  });
+
+  return clone;
+}
+
+function cloneMaterial(material) {
+  const clone = material.clone();
+
+  Object.entries(clone).forEach(([key, value]) => {
+    if (!value?.isTexture) return;
+    clone[key] = value.clone();
+    clone[key].needsUpdate = true;
+  });
+
+  return clone;
 }
 
 function fitObject(object, options = {}) {

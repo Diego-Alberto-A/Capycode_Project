@@ -1,0 +1,326 @@
+\documentclass[12pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{listings}
+
+\geometry{margin=2.5cm}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\lstdefinestyle{comandos}{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  columns=fullflexible
+}
+
+\title{Guía de despliegue de CapyCode}
+\author{Documento técnico básico}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introducción}
+
+Este documento explica cómo instalar y ejecutar el proyecto CapyCode en una computadora o servidor. La idea es dejar una guía práctica para una persona que no necesariamente sabe mucho de servidores, pero que necesita levantar el sistema de forma ordenada.
+
+CapyCode no es solamente una página estática. No funciona como una página simple de Netlify donde solo se suben archivos HTML. Este proyecto usa:
+
+\begin{itemize}
+  \item un servidor en Node.js;
+  \item una base de datos MySQL;
+  \item archivos web en HTML, CSS y JavaScript;
+  \item modelos 3D cargados en el navegador;
+  \item variables privadas en un archivo \texttt{.env}.
+\end{itemize}
+
+Por eso, para que la página funcione, el servidor de Node.js y la base de datos deben estar funcionando al mismo tiempo.
+
+\section{Resumen rápido de ejecución}
+
+La forma general de levantar el proyecto es esta:
+
+\begin{enumerate}
+  \item Instalar Node.js y npm.
+  \item Instalar MySQL.
+  \item Crear/configurar el archivo \texttt{.env}.
+  \item Instalar las dependencias una sola vez con:
+\end{enumerate}
+
+\begin{lstlisting}[style=comandos]
+npm install
+\end{lstlisting}
+
+\begin{enumerate}[resume]
+  \item Cargar la base de datos una sola vez con:
+\end{enumerate}
+
+\begin{lstlisting}[style=comandos]
+sudo mysql -u root -p < schema.sql
+\end{lstlisting}
+
+En Windows normalmente no se usa \texttt{sudo}; el comando equivalente suele ser:
+
+\begin{lstlisting}[style=comandos]
+mysql -u root -p < schema.sql
+\end{lstlisting}
+
+\begin{enumerate}[resume]
+  \item Ejecutar la página con:
+\end{enumerate}
+
+\begin{lstlisting}[style=comandos]
+npm start
+\end{lstlisting}
+
+\section{Dependencias necesarias en Windows 11}
+
+Asumiendo una instalación normal o ``de fábrica'' de Windows 11, normalmente se necesita instalar lo siguiente.
+
+\subsection{Node.js y npm}
+
+Node.js es el entorno que ejecuta el servidor del proyecto. npm es el gestor de paquetes que descarga las librerías necesarias.
+
+\begin{itemize}
+  \item Instalar Node.js desde \url{https://nodejs.org/}.
+  \item Se recomienda usar una versión LTS moderna, por ejemplo Node.js 20 o 22.
+  \item npm viene incluido al instalar Node.js.
+\end{itemize}
+
+Para comprobar que quedó instalado:
+
+\begin{lstlisting}[style=comandos]
+node -v
+npm -v
+\end{lstlisting}
+
+\subsection{MySQL}
+
+MySQL es la base de datos donde se guardan usuarios, progreso, skins, grupos, preguntas respondidas y otros datos del sistema.
+
+\begin{itemize}
+  \item En Windows se puede instalar MySQL Community Server.
+  \item También puede usarse una instalación de MySQL en otro servidor.
+  \item Lo importante es que el servidor MySQL esté encendido mientras CapyCode está corriendo.
+\end{itemize}
+
+Para probar conexión:
+
+\begin{lstlisting}[style=comandos]
+mysql -u root -p
+\end{lstlisting}
+
+\subsection{Git}
+
+Git no es obligatorio para ejecutar el proyecto si ya se tiene la carpeta, pero sí es muy útil para descargarlo desde GitHub o mantener versiones.
+
+\begin{lstlisting}[style=comandos]
+git --version
+\end{lstlisting}
+
+\section{Dependencias del proyecto}
+
+Las dependencias JavaScript se instalan con:
+
+\begin{lstlisting}[style=comandos]
+npm install
+\end{lstlisting}
+
+Este comando lee \texttt{package.json} y \texttt{package-lock.json}. No hace falta correrlo cada vez que se inicia la página. Se corre una vez al instalar, o cuando cambian las dependencias.
+
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{7cm}|}
+\hline
+\textbf{Paquete} & \textbf{Versión instalada} & \textbf{Uso dentro del proyecto} \\
+\hline
+\endhead
+\texttt{express} & \texttt{4.22.2} & Servidor web de Node.js. Sirve la página, archivos estáticos y rutas API. \\
+\hline
+\texttt{three} & \texttt{0.172.0} & Motor/librería 3D usada en el navegador para mostrar mapas, personajes y portales. \\
+\hline
+\texttt{mysql2} & \texttt{3.22.4} & Conector para que Node.js pueda hablar con MySQL usando promesas. \\
+\hline
+\texttt{dotenv} & \texttt{16.6.1} & Carga variables privadas desde el archivo \texttt{.env}. \\
+\hline
+\texttt{bcryptjs} & \texttt{2.4.3} & Sirve para manejar contraseñas de forma segura mediante hash. \\
+\hline
+\texttt{jsonwebtoken} & \texttt{9.0.3} & Maneja tokens de sesión para login y autenticación. \\
+\hline
+\end{longtable}
+
+\subsection{Compatibilidad aproximada}
+
+El proyecto usa dependencias modernas, pero no demasiado raras. En general:
+
+\begin{itemize}
+  \item Node.js 20 o 22 debería funcionar bien.
+  \item Node.js 18 probablemente también funcione, pero es mejor usar LTS reciente.
+  \item Express 4.x es compatible con el estilo actual del servidor.
+  \item Three.js puede cambiar bastante entre versiones, así que conviene quedarse con \texttt{0.172.0} salvo que se pruebe bien.
+  \item MySQL 8 es una opción recomendada. MySQL 5.7 o MariaDB pueden funcionar en varios casos, pero no conviene asumirlo sin probar el esquema.
+  \item \texttt{package-lock.json} ayuda a instalar las mismas versiones exactas.
+\end{itemize}
+
+\section{Configuración del archivo .env}
+
+El archivo \texttt{.env} es necesario porque guarda datos privados o configuraciones que no deben escribirse directamente en el código.
+
+Ejemplo de estructura:
+
+\begin{lstlisting}[style=comandos]
+PORT=3000
+DB_HOST=localhost
+DB_USER=capycode
+DB_PASSWORD=tu_password
+DB_NAME=capycode
+JWT_SECRET=cambia_esto_por_un_texto_largo
+OPENAI_API_KEY=opcional
+OPENAI_MODEL=gpt-4o-mini
+\end{lstlisting}
+
+\subsection{Por qué no se debe subir .env a GitHub}
+
+El archivo \texttt{.env} puede contener contraseñas de la base de datos y llaves de API. Por eso debe estar en \texttt{.gitignore}. Si se sube por accidente, otra persona podría usar esas credenciales.
+
+En producción, si se usa un hosting como Render, Railway u otro, normalmente estas variables se escriben en el panel del hosting, no en un archivo físico.
+
+\section{Preparar la base de datos}
+
+Antes de ejecutar el proyecto, hay que crear las tablas de MySQL. Este proyecto incluye el archivo:
+
+\begin{lstlisting}[style=comandos]
+schema.sql
+\end{lstlisting}
+
+En Linux o en un servidor donde se use \texttt{sudo}, se puede correr:
+
+\begin{lstlisting}[style=comandos]
+sudo mysql -u root -p < schema.sql
+\end{lstlisting}
+
+En Windows, normalmente sería:
+
+\begin{lstlisting}[style=comandos]
+mysql -u root -p < schema.sql
+\end{lstlisting}
+
+Este paso se hace una sola vez al preparar la base de datos. Después de eso, MySQL debe quedar corriendo mientras la página esté activa.
+
+\section{Instalación y ejecución}
+
+\subsection{Instalación inicial}
+
+Dentro de la carpeta del proyecto:
+
+\begin{lstlisting}[style=comandos]
+npm install
+\end{lstlisting}
+
+\subsection{Ejecución normal}
+
+Para iniciar el servidor:
+
+\begin{lstlisting}[style=comandos]
+npm start
+\end{lstlisting}
+
+El proyecto usa el script definido en \texttt{package.json}:
+
+\begin{lstlisting}[style=comandos]
+"start": "node server.js"
+\end{lstlisting}
+
+Por defecto, si \texttt{PORT} no está definido, el servidor usa el puerto \texttt{3000}. Entonces se abre en:
+
+\begin{lstlisting}[style=comandos]
+http://localhost:3000
+\end{lstlisting}
+
+\section{Notas para hosting}
+
+En un hosting real, no basta con subir los archivos como una página HTML normal. El hosting debe permitir ejecutar Node.js y conectarse a una base de datos MySQL.
+
+El servidor que aloje el proyecto debe tener:
+
+\begin{itemize}
+  \item Node.js instalado o soportado por el proveedor.
+  \item Las variables de entorno configuradas.
+  \item Acceso a una base de datos MySQL.
+  \item El comando de instalación: \texttt{npm install}.
+  \item El comando de inicio: \texttt{npm start}.
+\end{itemize}
+
+Si la base de datos está en otro servidor, entonces \texttt{DB\_HOST}, \texttt{DB\_USER}, \texttt{DB\_PASSWORD} y \texttt{DB\_NAME} deben apuntar a ese servidor.
+
+\section{Problemas comunes}
+
+\subsection{La página no abre}
+
+Revisar:
+
+\begin{itemize}
+  \item que \texttt{npm start} no haya mostrado errores;
+  \item que el puerto sea correcto;
+  \item que se esté abriendo \texttt{http://localhost:3000} o el dominio correcto.
+\end{itemize}
+
+\subsection{Error de conexión a MySQL}
+
+Posibles causas:
+
+\begin{itemize}
+  \item MySQL no está encendido.
+  \item El usuario o contraseña en \texttt{.env} están mal.
+  \item La base de datos no existe.
+  \item No se ejecutó \texttt{schema.sql}.
+\end{itemize}
+
+\subsection{Login no funciona}
+
+Puede ser problema de base de datos o de sesión. Revisar:
+
+\begin{itemize}
+  \item que existan usuarios en la base de datos;
+  \item que \texttt{JWT\_SECRET} esté definido;
+  \item que el servidor no esté mostrando errores en consola.
+\end{itemize}
+
+\subsection{Los modelos 3D no cargan}
+
+Revisar:
+
+\begin{itemize}
+  \item que existan los archivos en \texttt{public/assets/objects};
+  \item que el navegador no muestre errores 404 en la consola;
+  \item que la versión de \texttt{three} instalada sea la esperada.
+\end{itemize}
+
+\subsection{Python AI Help no aparece}
+
+El botón de ayuda con IA solo aparece si existe una llave API configurada. Revisar:
+
+\begin{lstlisting}[style=comandos]
+OPENAI_API_KEY=tu_llave
+\end{lstlisting}
+
+Si no se configura, el botón no aparece y el chat queda deshabilitado.
+
+\section{Conclusión}
+
+El despliegue de CapyCode requiere más pasos que una página estática, porque combina servidor, base de datos y frontend 3D. La parte más importante es instalar dependencias con \texttt{npm install}, preparar MySQL con \texttt{schema.sql}, configurar bien el archivo \texttt{.env} y ejecutar el servidor con \texttt{npm start}.
+
+Si esos puntos están bien, el proyecto debería poder ejecutarse de forma estable en una computadora local o en un servidor que soporte Node.js y MySQL.
+
+\end{document}
